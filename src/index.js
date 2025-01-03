@@ -1,5 +1,6 @@
+require('dotenv').config();
 const { Client, IntentsBitField } = require('discord.js');
-const sqlite3 = require('sqlite3');
+const eventHandler = require('./handlers/eventHandler');
 
 const client = new Client({
     intents: [
@@ -11,27 +12,6 @@ const client = new Client({
     ],
 });
 
-const db = new sqlite3.Database('./db.sqlite');
+eventHandler(client);
 
-client.on('ready', (c) => {
-    console.log(`${c.user.tag} is online.`);
-});
-
-client.on('error', (err) => { 
-    console.error(err);
-});
-
-client.on('warn', (info) => { 
-    console.warn(info);
-});
-
-client.on('messageCreate', (msg) => {
-    console.log(msg.author.tag + ":", msg.content);
-    if (msg.content === 'nig') {
-        msg.reply('ger');
-    }
-});
-
-client.login(
-    'MTMwNjgxNDkyMzQ4MDg5NTUyOA.Ghkvak.I9TQKN9wsJ3uqj7bIMnEa6yMdV7LdVcSJsaDOA'
-);
+client.login(process.env.TOKEN);
