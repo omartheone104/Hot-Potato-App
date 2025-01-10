@@ -8,6 +8,8 @@ module.exports = async (client, interaction) => {
   const localCommands = getLocalCommands();
 
   try {
+    const guildId = interaction.guild.id;
+    const state = gameState.getState(guildId);
     const commandObject = localCommands.find(
       (cmd) => cmd.name === interaction.commandName
     );
@@ -50,14 +52,13 @@ module.exports = async (client, interaction) => {
       }
     }
 
-    if (interaction.commandName !== 'start' && interaction.commandName !== 'end' && !gameState.started) {
+    if (interaction.commandName !== 'start' && interaction.commandName !== 'end' && interaction.commandName !== 'help' && !state.started) {
       interaction.reply({
         content: 'You need to start the game first by using the `/start` command.',
         ephemeral: true,
       });
       return;
     }
-
     await commandObject.callback(client, interaction);
   } catch (error) {
     console.log(`There was an error running this command: ${error}`);

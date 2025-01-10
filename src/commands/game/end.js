@@ -10,6 +10,8 @@ module.exports = {
 
     callback: async (client, interaction) => {
         try {
+            const guildId = interaction.guild.id;
+            const state = gameState.getState(guildId);
             /*if (!gameState.started) {
                 interaction.reply({
                     content: 'You need to start the game first by using the `/start` command.',
@@ -17,7 +19,7 @@ module.exports = {
                 });
                 return;
             }*/
-            gameState.started = false;
+            state.started = false;
             hotPotato.endPotato(client, interaction);
         } catch (error) {
             console.log(`An error occurred while ending the hot potato game: ${error}`);

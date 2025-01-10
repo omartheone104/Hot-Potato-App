@@ -10,14 +10,18 @@ module.exports = {
 
     callback: async (client, interaction) => {
         try {
-            if (gameState.started) {
+            const guildId = interaction.guild.id;
+            const state = gameState.getState(guildId);
+
+            if (state.started) {
                 interaction.reply({
                     content: 'The game has already started!',
                     ephemeral: true,
                 });
                 return;
             }
-            gameState.started = true;
+
+            state.started = true;
             hotPotato.startPotato(client, interaction);
         } catch (error) {
             console.log(`An error occurred while starting the hot potato game: ${error}`);
