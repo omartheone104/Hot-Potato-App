@@ -5,10 +5,13 @@ const gameState = require("./utils/gameState");
 const moment = require('moment');
 var time_map = new Map();
 var timeout;
-var expirationtime = 10000;
+var expirationtime = 8.64e+7;
+// 8.64e+7
+var count = 0;
 
 module.exports = {
     startPotato: async function startPotato(client, interaction) {
+        count = 0;
         const guild = await interaction.guild;
         const channel = await interaction.channel;
         const state = gameState.getState(guild.id);
@@ -56,6 +59,7 @@ module.exports = {
         let date = new Date();
         date = date.toUTCString();
         clearTimeout(timeout);
+
         db.get("SELECT HasPotato FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
             player_with_potato = `${column.HasPotato}`;
             if(interaction.user.username != player_with_potato){
@@ -94,6 +98,8 @@ module.exports = {
                 });
             }
         });
+        count++;
+        this.timeFunc(client, interaction, count);
         timeout = setTimeout(() => this.kickPlayer(client, interaction), time_map.get(correct_guild));
     },
     PassRandomPotato: async function PassRandomPotato(client, interaction){
@@ -106,6 +112,7 @@ module.exports = {
         let date = new Date();
         date = date.toUTCString();
         clearTimeout(timeout);
+
         db.get("SELECT HasPotato FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
             player_with_potato = `${column.HasPotato}`;
             if(interaction.user.username != player_with_potato){
@@ -128,6 +135,8 @@ module.exports = {
                 });
             }
         });
+        count++;
+        this.timeFunc(client, interaction, count);
         timeout = setTimeout(() => this.kickPlayer(client, interaction), time_map.get(correct_guild));
     },
     getPotatoHolder: async function getPotatoHolder(client, interaction){
@@ -165,6 +174,7 @@ module.exports = {
         let new_player_with_potato;
         let date = new Date();
         date = date.toUTCString();
+        
         db.get("SELECT RemainingPlayers, HasPotato FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
             current_players = `${column.RemainingPlayers}`;
             current_players_arr = current_players.split(',');
@@ -184,12 +194,14 @@ module.exports = {
                 this.gameEnded(client, interaction);
             }
         });
+        this.timeFunc(client, interaction, count);
         timeout = setTimeout(() => this.kickPlayer(client, interaction), time_map.get(correct_guild));
     },
     getRemainingPlayers: async function getRemainingPlayers(client, interaction){
         const correct_guild = await interaction.guild.id;
         let current_players;
         let current_players_arr = [];
+
         db.get("SELECT RemainingPlayers FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
             current_players = `${column.RemainingPlayers}`;
             current_players_arr = current_players.split(',');
@@ -199,17 +211,17 @@ module.exports = {
     },
     endPotato: async function endPotato(client, interaction){
         const correct_guild = await interaction.guild.id;
+
         db.run("DELETE FROM Game WHERE GuildID = " + correct_guild);
         await interaction.reply("Force end game");
     },
-    checkPotato: async function checkPotato(client, interaction){
+    timeFunc: async function timeFunc(client, interaction, count){
         const correct_guild = await interaction.guild.id;
-        let date = new Date();
-        date = date.toUTCString();
-        date = moment(date);
-        console.log(date);
-        db.get("SELECT RemainingPlayers, DatePotatoGiven FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
-            
+
+        db.get("SELECT * FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
+            expirationtime = expirationtime * ((1 - 0.05) ** count);
+            //console.log(expirationtime);
+            time_map.set(correct_guild, expirationtime);
         });
     }
 };
