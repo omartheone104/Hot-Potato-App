@@ -63,7 +63,7 @@ module.exports = {
         db.get("SELECT HasPotato FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
             player_with_potato = `${column.HasPotato}`;
             if(interaction.user.username != player_with_potato){
-                interaction.deferReply({content: "You do not have the potato. " + player_with_potato + " has the potato.", ephemeral: true, });
+                interaction.followUp({content: "You do not have the potato. " + player_with_potato + " has the potato.", ephemeral: true, });
                 return;
             } else {
                 db.get("SELECT RemainingPlayers FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
@@ -80,20 +80,20 @@ module.exports = {
                         }
                     }
                     if (!targetUser) {
-                        interaction.deferReply({content: "User not found", ephemeral: true, });
+                        interaction.followUp({content: "User not found", ephemeral: true, });
                         return;
                     } else if (targetUser.id === interaction.user.id) {
-                        interaction.deferReply({content: "You can't pass the hot potato to yourself", ephemeral: true,});
+                        interaction.followUp({content: "You can't pass the hot potato to yourself", ephemeral: true,});
                         return;
                     } else if (targetUser.user.bot) {
-                        interaction.deferReply({content: "You can't pass the hot potato to a bot", ephemeral: true,});
+                        interaction.followUp({content: "You can't pass the hot potato to a bot", ephemeral: true,});
                         return;
                     } else if (!check) {
-                        interaction.deferReply({content: "This user is currently not in the game", ephemeral: true,});
+                        interaction.followUp({content: "This user is currently not in the game", ephemeral: true,});
                         return;
                     } else {
                         db.run("UPDATE Game SET ChannelID = " + channelID + ", HasPotato = \'" + targetUser.user.username + "\', DatePotatoGiven = \'" + date + "\' WHERE GuildID = " + correct_guild);
-                        interaction.deferReply("The hot potato has been passed to " + targetUser.user.username);
+                        interaction.followUp("The hot potato has been passed to " + targetUser.user.username);
                     }
                 });
             }
@@ -116,7 +116,7 @@ module.exports = {
         db.get("SELECT HasPotato FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
             player_with_potato = `${column.HasPotato}`;
             if(interaction.user.username != player_with_potato){
-                interaction.deferReply({content: "You do not have the potato. " + player_with_potato + " has the potato.", ephemeral: true, });
+                interaction.followUp({content: "You do not have the potato. " + player_with_potato + " has the potato.", ephemeral: true, });
                 return;
             } else {
                 db.get("SELECT RemainingPlayers FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
@@ -131,7 +131,7 @@ module.exports = {
                     let rng = Math.floor(Math.random() * size);
                     new_player_with_potato = current_players_arr[rng];
                     db.run("UPDATE Game SET ChannelID = " + channelID + ", HasPotato = \'" + new_player_with_potato + "\', DatePotatoGiven = \'" + date + "\' WHERE GuildID = " + correct_guild);
-                    interaction.deferReply("The hot potato has been passed to " + new_player_with_potato);
+                    interaction.followUp("The hot potato has been passed to " + new_player_with_potato);
                 });
             }
         });
@@ -142,7 +142,7 @@ module.exports = {
     getPotatoHolder: async function getPotatoHolder(client, interaction){
         const correct_guild = await interaction.guild.id;
         db.get("SELECT HasPotato FROM Game WHERE GuildID = " + correct_guild, (err, column)=>{
-            interaction.deferReply(`${column.HasPotato} has the potato`);
+            interaction.followUp(`${column.HasPotato} has the potato`);
         });
     },
     gameEnded: async function gameEnded(client, interaction){
@@ -158,7 +158,7 @@ module.exports = {
             members.forEach((member) => {
                 userID = member.user.id;
             });
-            interaction.deferReply(`<@${userID}> is the winner!`);
+            interaction.followUp(`<@${userID}> is the winner!`);
         });
         clearTimeout(timeout);
         state.started = false;
@@ -206,7 +206,7 @@ module.exports = {
             current_players = `${column.RemainingPlayers}`;
             current_players_arr = current_players.split(',');
             current_players = current_players_arr.join(', ');
-            interaction.deferReply("Players remaining: " + current_players);
+            interaction.followUp("Players remaining: " + current_players);
         });
     },
     endPotato: async function endPotato(client, interaction){
