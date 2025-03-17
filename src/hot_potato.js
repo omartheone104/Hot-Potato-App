@@ -189,7 +189,7 @@ module.exports = {
             let rng = Math.floor(Math.random() * size);
             new_player_with_potato = current_players_arr[rng];
             db.run("UPDATE Game SET ChannelID = " + channelID + ", RemainingPlayers = \'" + username_string + "\', HasPotato = \'" + new_player_with_potato + "\', DatePotatoGiven = \'" + date + "\' WHERE GuildID = " + correct_guild);
-            interaction.deferReply(player_with_potato + " is out. " + new_player_with_potato + " has the potato.");
+            interaction.reply(player_with_potato + " is out. " + new_player_with_potato + " has the potato.");
             if(current_players_arr.length == 1){
                 this.gameEnded(client, interaction);
             }
