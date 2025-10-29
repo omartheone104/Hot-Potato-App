@@ -3,7 +3,7 @@ const hotPotato = require("../../hot_potato");
 
 module.exports = {
     name: 'kick',
-    description: 'kicks player with the hot potato out of the game',
+    description: 'kicks player with the hot potato out of the game (admin only)',
     devOnly: true,
     // options: Object[],
 

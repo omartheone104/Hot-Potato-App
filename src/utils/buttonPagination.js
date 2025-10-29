@@ -1,15 +1,15 @@
 require("colors");
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder } = require("discord.js");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, MessageFlags } = require("discord.js");
 const mConfig = require("./../../messageConfig.json");
 
 module.exports = async (interaction, pages, time = 30_000) => {
 	try {
 		if (!interaction || !pages || !pages.length > 0) return console.log("[ERROR]".red + "Error trying to use buttonPagination.js: Invalid arguments given");
 
-		await interaction.deferReply();
+		await interaction.deferReply({flags: MessageFlags.Ephemeral});
 
 		if (pages.length === 1) {
-			return await interaction.editReply({ embeds: pages, components: [], fetchReply: true });
+			return await interaction.editReply({ embeds: pages, components: [], fetchReply: true, flags: MessageFlags.Ephemeral });
 		};
 
 		const prev = new ButtonBuilder()
@@ -42,7 +42,7 @@ module.exports = async (interaction, pages, time = 30_000) => {
 					.setColor(`${mConfig.embedColorError}`)
 					.setDescription(`${mConfig.cannotUseSelect}`);
 
-				return i.reply({ embeds: [rEmbed], ephemeral: true });
+				return i.reply({ embeds: [rEmbed], flags: MessageFlags.Ephemeral });
 			};
 
 			await i.deferUpdate();
