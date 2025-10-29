@@ -194,7 +194,7 @@ module.exports = {
             let player_with_potato_username = members_and_ID.get(player_with_potato);
             let new_player_with_potato_username = members_and_ID.get(new_player_with_potato);
             db.run("UPDATE Game SET ChannelID = " + channelID + ", RemainingPlayers = \'" + username_string + "\', HasPotato = \'" + new_player_with_potato + "\', DatePotatoGiven = \'" + date + "\' WHERE GuildID = " + correct_guild);
-            interaction.followUp(`${player_with_potato_username} is out. ${new_player_with_potato_username} has the potato.`);
+            interaction.reply(player_with_potato + " is out. " + new_player_with_potato + " has the potato.");
             if(current_players_arr.length == 1){
                 this.gameEnded(client, interaction);
             }
