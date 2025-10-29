@@ -16,7 +16,8 @@ module.exports = {
             const commandFiles = fs.readdirSync(`./src/commands/${folder}`).filter(file => file.endsWith('.js'));
             
             const categoryEmbed = new EmbedBuilder()
-                    .setTitle(folder)
+                    .setTitle("The Hot Potato Game")
+                    .setDescription("Welcome to Hot Potato. The objective of the game is to be the last one standing! The potato is hot and you must pass it around. You have a limited amount of time before the potato burns you. It gets hotter when it is passed around and when the amount of players decreases. Good luck and don't get cooked.")
                     .setTimestamp()
                     .setThumbnail(client.user.displayAvatarURL());
 

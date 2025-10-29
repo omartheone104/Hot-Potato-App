@@ -1,4 +1,4 @@
-const { Client, Interaction } = require("discord.js");
+const { Client, Interaction, MessageFlags } = require("discord.js");
 const hotPotato = require("../../hot_potato");
 const gameState = require("../../utils/gameState");
 
@@ -16,7 +16,7 @@ module.exports = {
             if (state.started) {
                 interaction.reply({
                     content: 'The game has already started!',
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                 });
                 return;
             }

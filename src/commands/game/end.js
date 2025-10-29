@@ -1,10 +1,10 @@
-const { Client, Interaction } = require("discord.js");
+const { Client, Interaction, MessageFlags } = require("discord.js");
 const hotPotato = require("../../hot_potato");
 const gameState = require("../../utils/gameState");
 
 module.exports = {
     name: 'end',
-    description: 'force the game to end',
+    description: 'force the game to end (admin only)',
     devOnly: true,
     // options: Object[],
 
@@ -15,7 +15,7 @@ module.exports = {
             /*if (!gameState.started) {
                 interaction.reply({
                     content: 'You need to start the game first by using the `/start` command.',
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                 });
                 return;
             }*/
