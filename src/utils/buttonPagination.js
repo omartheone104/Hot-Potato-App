@@ -6,7 +6,7 @@ module.exports = async (interaction, pages, time = 30_000) => {
 	try {
 		if (!interaction || !pages || !pages.length > 0) return console.log("[ERROR]".red + "Error trying to use buttonPagination.js: Invalid arguments given");
 
-		await interaction.deferReply({flags: MessageFlags.Ephemeral});
+		await interaction.deferReply();
 
 		if (pages.length === 1) {
 			return await interaction.editReply({ embeds: pages, components: [], fetchReply: true, flags: MessageFlags.Ephemeral });
@@ -18,18 +18,12 @@ module.exports = async (interaction, pages, time = 30_000) => {
 			.setStyle(ButtonStyle.Primary)
 			.setDisabled(true);
 
-		const home = new ButtonBuilder()
-			.setCustomId('home')
-			.setEmoji('🏠')
-			.setStyle(ButtonStyle.Secondary)
-			.setDisabled(true);
-
 		const next = new ButtonBuilder()
 			.setCustomId('next')
 			.setEmoji('➡️')
 			.setStyle(ButtonStyle.Primary);
 
-		const buttons = new ActionRowBuilder().setComponents(prev, home, next);
+		const buttons = new ActionRowBuilder().setComponents(prev, next);
 		let index = 0;
 
 		const msg = await interaction.editReply({ embeds: [pages[index]], components: [buttons], fetchReply: true });
@@ -41,7 +35,6 @@ module.exports = async (interaction, pages, time = 30_000) => {
 				const rEmbed = new EmbedBuilder()
 					.setColor(`${mConfig.embedColorError}`)
 					.setDescription(`${mConfig.cannotUseSelect}`);
-
 				return i.reply({ embeds: [rEmbed], flags: MessageFlags.Ephemeral });
 			};
 
@@ -51,9 +44,6 @@ module.exports = async (interaction, pages, time = 30_000) => {
 				case "prev":
 					if (index > 0) index--;
 					break;
-				case "home":
-					index = 0;
-					break;
 				case "next":
 					if (index < pages.length - 1) index++;
 					break;
@@ -61,10 +51,8 @@ module.exports = async (interaction, pages, time = 30_000) => {
 
 			if (index === 0) {
 				prev.setDisabled(true);
-				home.setDisabled(true);
 			} else {
 				prev.setDisabled(false);
-				home.setDisabled(false);
 			};
 
 			index === pages.length - 1

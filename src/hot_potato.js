@@ -8,15 +8,15 @@ const members_and_ID = new Map();
 const time_map = new Map();
 const timeout_map = new Map();
 const count_map = new Map();
-var expirationtime = 15000;
-// 8.64e+7
 var count = 0;
+// 8.64e+7
 
 module.exports = {
     startPotato: async function startPotato(client, interaction) {
         const guild = interaction.guild;
         const channel = interaction.channel;
         const state = gameState.getState(guild.id);
+        const baseTime = 30000;
 
         let members = await guild.members.fetch();
         members = members.filter(m => !m.user.bot);
@@ -25,7 +25,7 @@ module.exports = {
         members.forEach(member => guildMembersMap.set(member.user.id, member.user.username));
 
         members_and_ID.set(guild.id, guildMembersMap);
-        time_map.set(guild.id, expirationtime);
+        time_map.set(guild.id, baseTime);
         count_map.set(guild.id, 0);
 
         const players = Array.from(guildMembersMap.keys());
@@ -201,6 +201,10 @@ module.exports = {
                 [channelID, current_players_arr.join(','), new_player_with_potato, date, correct_guild]);
 
             interaction.followUp(`${player_with_potato_username} is out. ${new_player_with_potato_username} has the potato.`);
+
+            // let count = count_map.get(correct_guild) ?? 0;
+            // count++;
+            // count_map.set(correct_guild, count);
             
             this.timeFunc(client, interaction);
             const timeout = setTimeout(() => this.kickPlayer(client, interaction), time_map.get(correct_guild));
@@ -228,7 +232,18 @@ module.exports = {
         await interaction.reply("Force end game");
     },
     timeFunc: async function timeFunc(client, interaction){
-        const correct_guild = await interaction.guild.id;
-        time_map.set(correct_guild, expirationtime);
+        const correct_guild = interaction.guild.id;
+        const baseTime = 30000;
+        const decayStep = 2000;
+        const minTime = 5000;
+
+        let count = count_map.get(correct_guild) ?? 0;
+        count++;
+        count_map.set(correct_guild, count);
+
+        const newTime = Math.max(baseTime - (decayStep * count), minTime);
+        time_map.set(correct_guild, newTime);
+
+        console.log(`[${correct_guild}] Timer updated → ${newTime / 1000}s (count: ${count})`);
     }
 };
