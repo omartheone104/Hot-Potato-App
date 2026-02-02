@@ -8,6 +8,8 @@ const members_and_ID = new Map();
 const time_map = new Map();
 const timeout_map = new Map();
 const count_map = new Map();
+const countdown_message_map = new Map();
+const countdown_interval_map = new Map();
 var count = 0;
 // 8.64e+7
 
@@ -16,7 +18,7 @@ module.exports = {
         const guild = interaction.guild;
         const channel = interaction.channel;
         const state = gameState.getState(guild.id);
-        const baseTime = 30000;
+        const baseTime = 10000;
 
         let members = await guild.members.fetch();
         members = members.filter(m => !m.user.bot);
@@ -45,14 +47,17 @@ module.exports = {
 
         await interaction.reply(`The hot potato game has started. <@${player_with_potato}> has the hot potato.`);
 
-        const timeout = setTimeout(() => this.kickPlayer(client, interaction), time_map.get(guild.id));
+        this.timeFunc(client, interaction);
+        const delay = time_map.get(guild.id);
+        this.startCountdown(interaction, delay);
+        clearTimeout(timeout_map.get(guild.id));
+        const timeout = setTimeout(() => this.kickPlayer(client, interaction), delay);
         timeout_map.set(guild.id, timeout);
     },
     PassPotato: async function PassPotato(client, interaction, targetUser) {
         const correct_guild = interaction.guild.id;
         const guildMembersMap = members_and_ID.get(correct_guild);
         const channelID = interaction.channel.id;
-        clearTimeout(timeout_map.get(correct_guild));
 
         db.get("SELECT HasPotato FROM Game WHERE GuildID = ?", [correct_guild], (err, column) => {
             if (err || !column) return;
@@ -90,8 +95,11 @@ module.exports = {
                 interaction.followUp(`The hot potato has been passed to ${targetUser.user.username}`);
 
                 this.timeFunc(client, interaction);
-                const timeout = setTimeout(() => this.kickPlayer(client, interaction), time_map.get(correct_guild));
-                timeout_map.set(correct_guild, timeout)
+                const delay = time_map.get(correct_guild);
+                this.startCountdown(interaction, delay);
+                clearTimeout(timeout_map.get(correct_guild));
+                const timeout = setTimeout(() => this.kickPlayer(client, interaction), delay);
+                timeout_map.set(correct_guild, timeout);
             });
         });
     },
@@ -99,7 +107,6 @@ module.exports = {
         const correct_guild = interaction.guild.id;
         const guildMembersMap = members_and_ID.get(correct_guild);
         const channelID = interaction.channel.id;
-        clearTimeout(timeout_map.get(correct_guild));
 
         db.get("SELECT HasPotato FROM Game WHERE GuildID = ?", [correct_guild], (err, column) => {
             if (err || !column) return;
@@ -116,7 +123,7 @@ module.exports = {
                 const rng = Math.floor(Math.random() * current_players_arr.length);
                 const new_player_with_potato = current_players_arr[rng];
                 const new_player_with_potato_username = guildMembersMap.get(new_player_with_potato);
-                const date = new Date().toUTCString;
+                const date = new Date().toUTCString();
 
                 db.run("UPDATE Game SET ChannelID = ?, HasPotato = ?, DatePotatoGiven = ? WHERE GuildID = ?", 
                     [channelID, new_player_with_potato, date, correct_guild]);
@@ -124,8 +131,11 @@ module.exports = {
                 interaction.followUp(`The hot potato has been passed to ${new_player_with_potato_username}`);
 
                 this.timeFunc(client, interaction);
-                const timeout = setTimeout(() => this.kickPlayer(client, interaction), time_map.get(correct_guild));
-                timeout_map.set(correct_guild, timeout)
+                const delay = time_map.get(correct_guild);
+                this.startCountdown(interaction, delay);
+                clearTimeout(timeout_map.get(correct_guild));
+                const timeout = setTimeout(() => this.kickPlayer(client, interaction), delay);
+                timeout_map.set(correct_guild, timeout);
             });
         });
     },
@@ -135,16 +145,21 @@ module.exports = {
 
         db.get("SELECT HasPotato FROM Game WHERE GuildID = ?", [correct_guild], (err, column) => {
             if (err || !column) return;
-            const current_potato = guildMembersMap.get(columnd.HasPotato);
+            const current_potato = guildMembersMap.get(column.HasPotato);
             interaction.followUp(`${current_potato} has the potato`);
         });
     },
     gameEnded: async function gameEnded(client, interaction, winner_id = null){
-        const guild = interaction.guild;
-        const correct_guild = guild.id;
-        const guildMembersMap = members_and_ID.get(correct_guild);
-        const state = gameState.getState(guild.id);
+        const correct_guild = interaction.guild.id;
+        if (countdown_interval_map.has(correct_guild)) {
+            clearInterval(countdown_interval_map.get(correct_guild));
+            countdown_interval_map.delete(correct_guild);
+        }
 
+        countdown_message_map.delete(correct_guild);
+
+        const guildMembersMap = members_and_ID.get(correct_guild);
+        const state = gameState.getState(correct_guild);
         clearTimeout(timeout_map.get(correct_guild));
 
         if (winner_id) {
@@ -207,7 +222,10 @@ module.exports = {
             // count_map.set(correct_guild, count);
             
             this.timeFunc(client, interaction);
-            const timeout = setTimeout(() => this.kickPlayer(client, interaction), time_map.get(correct_guild));
+            const delay = time_map.get(correct_guild);
+            this.startCountdown(interaction, delay);
+            clearTimeout(timeout_map.get(correct_guild));
+            const timeout = setTimeout(() => this.kickPlayer(client, interaction), delay);
             timeout_map.set(correct_guild, timeout);
         });
     },
@@ -223,6 +241,12 @@ module.exports = {
     },
     endPotato: async function endPotato(client, interaction){
         const correct_guild = interaction.guild.id;
+        if (countdown_interval_map.has(correct_guild)) {
+            clearInterval(countdown_interval_map.get(correct_guild));
+            countdown_interval_map.delete(correct_guild);
+        }
+
+        countdown_message_map.delete(correct_guild);
         db.run("DELETE FROM Game WHERE GuildID = ?", correct_guild);
         clearTimeout(timeout_map.get(correct_guild));
         members_and_ID.delete(correct_guild);
@@ -233,7 +257,7 @@ module.exports = {
     },
     timeFunc: async function timeFunc(client, interaction){
         const correct_guild = interaction.guild.id;
-        const baseTime = 30000;
+        const baseTime = 10000;
         const decayStep = 2000;
         const minTime = 5000;
 
@@ -245,5 +269,50 @@ module.exports = {
         time_map.set(correct_guild, newTime);
 
         console.log(`[${correct_guild}] Timer updated → ${newTime / 1000}s (count: ${count})`);
+    },
+    startCountdown: async function startCountdown(interaction, totalMs){
+        const correct_guild = interaction.guild.id;
+        
+        if (countdown_interval_map.has(correct_guild)){
+            clearInterval(countdown_interval_map.get(correct_guild));
+            countdown_interval_map.delete(correct_guild);
+        }
+
+        let remaining = Math.ceil(totalMs / 1000);
+
+        let message = countdown_message_map.get(correct_guild);
+
+        if (!message) {
+            message = await interaction.channel.send(`Hot Potato Timer \n${remaining} seconds remaining\n${this.progressBar(remaining, totalMs)}`);
+            countdown_message_map.set(correct_guild, message);
+        } else {
+            await message.edit(`Hot Potato Timer \n${remaining} seconds remaining\n${this.progressBar(remaining, totalMs)}`);
+        }
+        
+        const interval = setInterval(async () => {
+            remaining--;
+
+            if (remaining <= 0) {
+                clearInterval(interval);
+                countdown_interval_map.delete(correct_guild);
+                return;
+            }
+
+            try {
+                await message.edit(
+                    `Hot Potato Timer \n${remaining} seconds remaining\n${this.progressBar(remaining, totalMs)}`
+                );
+            } catch {
+                clearInterval(interval);
+                countdown_interval_map.delete(correct_guild);
+            }
+        }, 1000);
+
+        countdown_interval_map.set(correct_guild, interval);
+    },
+    progressBar: function progressBar(remaining, totalMs, size = 10){
+        const totalSeconds = Math.ceil(totalMs / 1000);
+        const filled = Math.round((remaining / totalSeconds) * size);
+        return "█".repeat(filled) + "░".repeat(size - filled);
     }
 };
