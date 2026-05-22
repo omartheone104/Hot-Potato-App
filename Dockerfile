@@ -6,6 +6,8 @@ COPY package*.json ./
 
 RUN npm ci
 
+RUN mkdir data
+
 COPY . .
 
 CMD ["node", "src/index.js"]
