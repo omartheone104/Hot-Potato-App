@@ -1,6 +1,6 @@
 const { Client, Interaction, Guild, MessageFlags } = require("discord.js");
 const sqlite3 = require('sqlite3');
-const db = new sqlite3.Database('./db.sqlite');
+const db = new sqlite3.Database('./data/db.sqlite');
 const gameState = require("./utils/gameState");
 const moment = require('moment');
 const { PlayerSubscription } = require("@discordjs/voice");

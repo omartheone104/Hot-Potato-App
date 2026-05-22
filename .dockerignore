@@ -1,4 +1,4 @@
-db.sqlite
+data/
 node_modules/
 .env
 .git

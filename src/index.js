@@ -2,7 +2,7 @@ require('dotenv').config();
 const { Client, IntentsBitField } = require('discord.js');
 const eventHandler = require('./handlers/eventHandler');
 const sqlite3 = require('sqlite3');
-const db = new sqlite3.Database('./db.sqlite');
+const db = new sqlite3.Database('./data/db.sqlite');
 
 const client = new Client({
     intents: [
