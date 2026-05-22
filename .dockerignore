@@ -1,4 +1,4 @@
 db.sqlite
 node_modules/
 .env
-config.json
+.git
