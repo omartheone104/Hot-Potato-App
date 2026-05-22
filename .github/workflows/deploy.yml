@@ -10,7 +10,7 @@ on:
 
 env:
   IMAGE_REGISTRY: ghcr.io
-  IMAGE_NAME: Hot-Potato-App
+  IMAGE_NAME: hot-potato-app
   USERNAME: ${{ secrets.USERNAME }}
   PASSWORD: ${{ secrets.PASSWORD }}
 
