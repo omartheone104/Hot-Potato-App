@@ -1,4 +1,5 @@
-.env
+.env.prod
+.env.dev
 db.sqlite
 node_modules/
 config.json
