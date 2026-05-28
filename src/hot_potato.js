@@ -268,7 +268,7 @@ module.exports = {
         count++;
         count_map.set(correct_guild, count);
 
-        const newTime = Math.max(baseTime * Math.pow(1 - decayPercent, count), minTime);
+        const newTime = Math.max(Math.floor(baseTime * Math.pow(1 - decayPercent, count)), minTime);
         time_map.set(correct_guild, newTime);
 
         console.log(`[${correct_guild}] Timer updated → ${(newTime / 1000).toFixed(2)}s (count: ${count})`);
