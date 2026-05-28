@@ -260,18 +260,18 @@ module.exports = {
     },
     timeFunc: async function timeFunc(client, interaction){
         const correct_guild = interaction.guild.id;
-        const baseTime = 10000;
-        const decayStep = 2000;
+        const baseTime = 24 * 60 * 60 * 1000;
+        const decayPercent = 0.01;
         const minTime = 5000;
 
         let count = count_map.get(correct_guild) ?? 0;
         count++;
         count_map.set(correct_guild, count);
 
-        const newTime = Math.max(baseTime - (decayStep * count), minTime);
+        const newTime = Math.max(baseTime * Math.pow(1 - decayPercent, count), minTime);
         time_map.set(correct_guild, newTime);
 
-        console.log(`[${correct_guild}] Timer updated → ${newTime / 1000}s (count: ${count})`);
+        console.log(`[${correct_guild}] Timer updated → ${(newTime / 1000).toFixed(2)}s (count: ${count})`);
     },
     startCountdown: async function startCountdown(interaction, totalMs){
         const correct_guild = interaction.guild.id;
@@ -285,11 +285,13 @@ module.exports = {
 
         let message = countdown_message_map.get(correct_guild);
 
+        const timeLabel = remaining === 1 ? "second" : "seconds";
+
         if (!message) {
-            message = await interaction.channel.send(`Hot Potato Timer \n${remaining} seconds remaining\n${this.progressBar(remaining, totalMs)}`);
+            message = await interaction.channel.send(`Hot Potato Timer \n${remaining} ${timeLabel} remaining\n${this.progressBar(remaining, totalMs)}`);
             countdown_message_map.set(correct_guild, message);
         } else {
-            await message.edit(`Hot Potato Timer \n${remaining} seconds remaining\n${this.progressBar(remaining, totalMs)}`);
+            await message.edit(`Hot Potato Timer \n${remaining} ${timeLabel} remaining\n${this.progressBar(remaining, totalMs)}`);
         }
         
         const interval = setInterval(async () => {
@@ -302,8 +304,9 @@ module.exports = {
             }
 
             try {
+                const timeLabel = remaining === 1 ? "second" : "seconds";
                 await message.edit(
-                    `Hot Potato Timer \n${remaining} seconds remaining\n${this.progressBar(remaining, totalMs)}`
+                    `Hot Potato Timer \n${remaining} ${timeLabel} remaining\n${this.progressBar(remaining, totalMs)}`
                 );
             } catch {
                 clearInterval(interval);

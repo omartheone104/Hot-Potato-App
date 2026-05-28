@@ -1,4 +1,4 @@
-const { devs } = require('../../../data/config.json');
+const { devs } = require('../../../config.json');
 const getLocalCommands = require('../../utils/getLocalCommands');
 const gameState = require("../../utils/gameState");
 const { MessageFlags } = require("discord.js");
