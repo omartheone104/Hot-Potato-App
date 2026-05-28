@@ -9,22 +9,42 @@ module.exports = {
     // options: Object[],
 
     callback: async (client, interaction) => {
-        try {
-            const guildId = interaction.guild.id;
-            const state = gameState.getState(guildId);
+        const guildId = interaction.guild.id;
+        const state = gameState.getState(guildId);
 
+        try {
             if (state.started) {
-                interaction.reply({
+                return interaction.reply({
                     content: 'The game has already started!',
                     flags: MessageFlags.Ephemeral,
                 });
-                return;
             }
 
+            if (state.starting) {
+                return interaction.reply({
+                    content: 'The game is currently starting.',
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
+
+            state.starting = true;
+
+            await hotPotato.startPotato(client, interaction);
+
             state.started = true;
-            hotPotato.startPotato(client, interaction);
         } catch (error) {
+            state.started = false;
+
             console.log(`An error occurred while starting the hot potato game: ${error}`);
+
+            if (!interaction.replied) {
+                await interaction.reply({
+                    content: 'Failed to start the game.',
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
+        } finally {
+            state.starting = false;
         }
     },
 }

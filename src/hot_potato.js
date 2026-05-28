@@ -38,6 +38,7 @@ module.exports = {
         if(players.length <= 1){
             await interaction.reply("Too few players.");
             state.started = false;
+            state.starting = false;
             return;
         }
         
@@ -178,6 +179,7 @@ module.exports = {
         }
         
         state.started = false;
+        state.starting = false;
         db.run("DELETE FROM Game WHERE GuildID = ?", [correct_guild]);
         members_and_ID.delete(correct_guild);
         time_map.delete(correct_guild);
@@ -261,6 +263,7 @@ module.exports = {
     timeFunc: async function timeFunc(client, interaction){
         const correct_guild = interaction.guild.id;
         const baseTime = 24 * 60 * 60 * 1000;
+        //const devBaseTime = 10000;
         const decayPercent = 0.01;
         const minTime = 5000;
 
@@ -269,6 +272,9 @@ module.exports = {
         count_map.set(correct_guild, count);
 
         const newTime = Math.max(Math.floor(baseTime * Math.pow(1 - decayPercent, count)), minTime);
+
+        //const newTime = Math.max(Math.floor(devBaseTime * Math.pow(1 - decayPercent, count)), minTime);
+
         time_map.set(correct_guild, newTime);
 
         console.log(`[${correct_guild}] Timer updated → ${(newTime / 1000).toFixed(2)}s (count: ${count})`);

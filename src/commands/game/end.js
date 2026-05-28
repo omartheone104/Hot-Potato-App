@@ -19,6 +19,7 @@ module.exports = {
                 });
                 return;
             }*/
+            state.starting = false;
             state.started = false;
             hotPotato.endPotato(client, interaction);
         } catch (error) {
