@@ -268,13 +268,14 @@ module.exports = {
         const minTime = 5000;
 
         let count = count_map.get(correct_guild) ?? 0;
-        count++;
-        count_map.set(correct_guild, count);
 
         const newTime = Math.max(Math.floor(baseTime * Math.pow(1 - decayPercent, count)), minTime);
 
         //const newTime = Math.max(Math.floor(devBaseTime * Math.pow(1 - decayPercent, count)), minTime);
 
+        count++;
+        
+        count_map.set(correct_guild, count);
         time_map.set(correct_guild, newTime);
 
         console.log(`[${correct_guild}] Timer updated → ${(newTime / 1000).toFixed(2)}s (count: ${count})`);
@@ -291,13 +292,11 @@ module.exports = {
 
         let message = countdown_message_map.get(correct_guild);
 
-        const timeLabel = remaining === 1 ? "second" : "seconds";
-
         if (!message) {
-            message = await interaction.channel.send(`Hot Potato Timer \n${remaining} ${timeLabel} remaining\n${this.progressBar(remaining, totalMs)}`);
+            message = await interaction.channel.send(`Hot Potato Timer \n${this.formatTime(remaining)} remaining\n${this.progressBar(remaining, totalMs)}`);
             countdown_message_map.set(correct_guild, message);
         } else {
-            await message.edit(`Hot Potato Timer \n${remaining} ${timeLabel} remaining\n${this.progressBar(remaining, totalMs)}`);
+            await message.edit(`Hot Potato Timer \n${this.formatTime(remaining)} remaining\n${this.progressBar(remaining, totalMs)}`);
         }
         
         const interval = setInterval(async () => {
@@ -310,9 +309,8 @@ module.exports = {
             }
 
             try {
-                const timeLabel = remaining === 1 ? "second" : "seconds";
                 await message.edit(
-                    `Hot Potato Timer \n${remaining} ${timeLabel} remaining\n${this.progressBar(remaining, totalMs)}`
+                    `Hot Potato Timer \n${this.formatTime(remaining)} remaining\n${this.progressBar(remaining, totalMs)}`
                 );
             } catch {
                 clearInterval(interval);
@@ -326,5 +324,26 @@ module.exports = {
         const totalSeconds = Math.ceil(totalMs / 1000);
         const filled = Math.round((remaining / totalSeconds) * size);
         return "█".repeat(filled) + "░".repeat(size - filled);
+    },
+    formatTime: function formatTime(totalSeconds){
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const parts = [];
+
+        if (hours > 0) {
+            parts.push(`${hours} hour${hours !== 1 ? "s" : ""}`);
+        }
+
+        if (minutes > 0) {
+            parts.push(`${minutes} minute${minutes !== 1 ? "s" : ""}`);
+        }
+
+        if (seconds > 0 || parts.length === 0) {
+            parts.push(`${seconds} second${seconds !== 1 ? "s" : ""}`);
+        }
+
+        return parts.join(", ");
     }
 };
