@@ -1,4 +1,4 @@
-const { Client, Interaction, Guild, MessageFlags } = require("discord.js");
+const { Client, Interaction, Guild, MessageFlags, InteractionResponse, Message } = require("discord.js");
 const sqlite3 = require('sqlite3');
 const db = new sqlite3.Database('./data/db.sqlite');
 const gameState = require("./utils/gameState");
@@ -47,16 +47,48 @@ module.exports = {
         const date = new Date().toUTCString();
 
         const sql_query = 'INSERT INTO Game VALUES (?, ?, ?, ?, ?, ?)';
-        db.run(sql_query, [guild.id, channel.id, players.join(','), players.join(','), player_with_potato, date]);
+        db.run(sql_query, [guild.id, channel.id, players.join(','), players.join(','), player_with_potato, date],
+            async (err) => {
+                if (err) {
+                    if (err.code === "SQLITE_CONSTRAINT") {
+                        console.log(`[${guild.id}] Attempted to start duplicate game.`);
+                        state.starting = false;
+                        state.started = false;
 
-        await interaction.reply(`The hot potato game has started. <@${player_with_potato}> has the hot potato.`);
+                        if (!interaction.replied) {
+                            await interaction.reply({
+                                content: "A game is already running.",
+                                flags: MessageFlags.Ephemeral,
+                            });
+                        }
 
-        this.timeFunc(client, interaction);
-        const delay = time_map.get(guild.id);
-        this.startCountdown(interaction, delay);
-        clearTimeout(timeout_map.get(guild.id));
-        const timeout = setTimeout(() => this.kickPlayer(client, interaction), delay);
-        timeout_map.set(guild.id, timeout);
+                        return;
+                    }
+
+                    console.error("SQLite Error: ", err);
+                    state.starting = false;
+                    state.started = false;
+
+                    if (!interaction.replied) {
+                        await interaction.reply({
+                            content: "Database error while starting game.",
+                            flags: MessageFlags.Ephemeral,
+                        });
+                    }
+
+                    return;
+                }
+
+                await interaction.reply(`The hot potato game has started. <@${player_with_potato}> has the hot potato.`);
+
+                this.timeFunc(client, interaction);
+                const delay = time_map.get(guild.id);
+                this.startCountdown(interaction, delay);
+                clearTimeout(timeout_map.get(guild.id));
+                const timeout = setTimeout(() => this.kickPlayer(client, interaction), delay);
+                timeout_map.set(guild.id, timeout);
+            }
+        );
     },
     PassPotato: async function PassPotato(client, interaction, targetUser) {
         const correct_guild = interaction.guild.id;
@@ -288,21 +320,24 @@ module.exports = {
             countdown_interval_map.delete(correct_guild);
         }
 
-        let remaining = Math.ceil(totalMs / 1000);
+        const endTime = Date.now() + totalMs;
 
         let message = countdown_message_map.get(correct_guild);
 
+        const remainingSeconds = Math.ceil(totalMs / 1000);
+
         if (!message) {
-            message = await interaction.channel.send(`Hot Potato Timer \n${this.formatTime(remaining)} remaining\n${this.progressBar(remaining, totalMs)}`);
+            message = await interaction.channel.send(`Hot Potato Timer \n${this.formatTime(remainingSeconds)} remaining\n${this.progressBar(totalMs, totalMs)}`);
             countdown_message_map.set(correct_guild, message);
         } else {
-            await message.edit(`Hot Potato Timer \n${this.formatTime(remaining)} remaining\n${this.progressBar(remaining, totalMs)}`);
+            await message.edit(`Hot Potato Timer \n${this.formatTime(remainingSeconds)} remaining\n${this.progressBar(totalMs, totalMs)}`);
         }
         
         const interval = setInterval(async () => {
-            remaining--;
+            const remainingMs = Math.max(0, endTime - Date.now());
+            const remainingSeconds = Math.ceil(remainingMs / 1000);
 
-            if (remaining <= 0) {
+            if (remainingMs <= 0) {
                 clearInterval(interval);
                 countdown_interval_map.delete(correct_guild);
                 return;
@@ -310,7 +345,7 @@ module.exports = {
 
             try {
                 await message.edit(
-                    `Hot Potato Timer \n${this.formatTime(remaining)} remaining\n${this.progressBar(remaining, totalMs)}`
+                    `Hot Potato Timer \n${this.formatTime(remainingSeconds)} remaining\n${this.progressBar(remainingMs, totalMs)}`
                 );
             } catch {
                 clearInterval(interval);
@@ -320,9 +355,8 @@ module.exports = {
 
         countdown_interval_map.set(correct_guild, interval);
     },
-    progressBar: function progressBar(remaining, totalMs, size = 10){
-        const totalSeconds = Math.ceil(totalMs / 1000);
-        const filled = Math.round((remaining / totalSeconds) * size);
+    progressBar: function progressBar(remainingMs, totalMs, size = 10){
+        const filled = Math.round((remainingMs / totalMs) * size);
         return "█".repeat(filled) + "░".repeat(size - filled);
     },
     formatTime: function formatTime(totalSeconds){
