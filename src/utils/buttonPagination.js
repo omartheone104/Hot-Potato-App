@@ -9,7 +9,7 @@ module.exports = async (interaction, pages, time = 30_000) => {
 		await interaction.deferReply();
 
 		if (pages.length === 1) {
-			return await interaction.editReply({ embeds: pages, components: [], fetchReply: true, flags: MessageFlags.Ephemeral });
+			return await interaction.editReply({ embeds: pages, components: [], withResponse: true, flags: MessageFlags.Ephemeral });
 		};
 
 		const prev = new ButtonBuilder()
@@ -26,7 +26,7 @@ module.exports = async (interaction, pages, time = 30_000) => {
 		const buttons = new ActionRowBuilder().setComponents(prev, next);
 		let index = 0;
 
-		const msg = await interaction.editReply({ embeds: [pages[index]], components: [buttons], fetchReply: true });
+		const msg = await interaction.editReply({ embeds: [pages[index]], components: [buttons], withResponse: true });
 
 		const btnCollector = await msg.createMessageComponentCollector({ componentType: ComponentType.Button, time });
 
@@ -64,11 +64,11 @@ module.exports = async (interaction, pages, time = 30_000) => {
 
 			btnCollector.resetTimer();
 
-			btnCollector.on("end", async () => {
-				await msg.edit({ embeds: [pages[index]], components: [] });
-			});
-
 			return msg;
+		});
+
+		btnCollector.on("end", async () => {
+			await msg.edit({ embeds: [pages[index]], components: [] });
 		});
 	} catch (err) {
 		console.log("[ERROR]".red + "Error in your buttonPagination.js file:");
