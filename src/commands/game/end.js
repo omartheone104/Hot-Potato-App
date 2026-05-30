@@ -1,4 +1,4 @@
-const { Client, Interaction, MessageFlags } = require("discord.js");
+const { Client, Interaction, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const hotPotato = require("../../hot_potato");
 const gameState = require("../../utils/gameState");
 
@@ -6,6 +6,7 @@ module.exports = {
     name: 'end',
     description: 'force the game to end (admin only)',
     devOnly: true,
+    defaultMemberPermissions: PermissionFlagsBits.Administrator,
     // options: Object[],
 
     callback: async (client, interaction) => {

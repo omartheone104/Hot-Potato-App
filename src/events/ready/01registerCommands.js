@@ -1,3 +1,4 @@
+const { defaultMemberPermissions } = require('../../commands/game/end');
 const areCommandsDifferent = require('../../utils/areCommandsDifferent');
 const getApplicationCommands = require('../../utils/getApplicationCommands');
 const getLocalCommands = require('../../utils/getLocalCommands');
@@ -10,7 +11,7 @@ module.exports = async (client) => {
     );
 
     for (const localCommand of localCommands) {
-      const { name, description, options } = localCommand;
+      const { name, description, options, defaultMemberPermissions, } = localCommand;
 
       const existingCommand = await applicationCommands.cache.find(
         (cmd) => cmd.name === name
@@ -27,6 +28,7 @@ module.exports = async (client) => {
           await applicationCommands.edit(existingCommand.id, {
             description,
             options,
+            defaultMemberPermissions,
           });
 
           console.log(`Edited command "${name}".`);
@@ -43,6 +45,7 @@ module.exports = async (client) => {
           name,
           description,
           options,
+          defaultMemberPermissions,
         });
 
         console.log(`Registered command ${name}.`);
