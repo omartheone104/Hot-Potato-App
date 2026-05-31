@@ -101,7 +101,7 @@ module.exports = {
                 }).catch(() => {});
                 
                 freshState.lobbyTimeout = null;
-            }, 5 * 60 * 1000);
+            }, 24 * 60 * 60 * 1000);
 
             const response = await interaction.reply({
                 embeds: [embed],
