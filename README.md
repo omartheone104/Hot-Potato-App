@@ -55,6 +55,19 @@ The bot is designed for small to medium Discord communities looking for quick, c
 
 ---
 
+## Commands
+- /end - force the game to end (admin only)
+- /help - Information about the game
+- /kick - kicks player with the hot potato out of the game (admin only)
+- /pass - pass the hot potato to another player
+- /passrandom - pass the hot potato to a random player
+- /remaining - displays remaining players in game
+- /start - starts a new Hot Potato lobby
+- /whohaspotato - displays the current holder of the potato
+- /asgore - Driving in my car right after a beer (meme command use in a voice channel)
+
+---
+
 ## Status
 
 Future updates planned (leaderboards and better performance)
