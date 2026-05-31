@@ -100,7 +100,10 @@ module.exports = {
                     components: [],
                 }).catch(() => {});
                 
+                clearTimeout(freshState.lobbyTimeout)
                 freshState.lobbyTimeout = null;
+          
+                await hotPotato.startPotato(client, interaction);
             }, 24 * 60 * 60 * 1000);
 
             const response = await interaction.reply({
