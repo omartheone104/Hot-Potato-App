@@ -1,5 +1,6 @@
 const { MessageFlags, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const gameState = require("../../utils/gameState");
+const hotPotato = require("../../hot_potato");
 
 module.exports = {
     name: 'start',
@@ -84,15 +85,12 @@ module.exports = {
                     return;
                 }
 
-                freshState.players = [];
-                freshState.hostId = null;
                 freshState.starting = false;
-                freshState.started = false;
-                freshState.lobbyMessageId = null;
+                freshState.started = true;
                 
                 const expiredEmbed = new EmbedBuilder()
                     .setTitle("Lobby Expired")
-                    .setDescription("No activity detected. The lobby has been closed.")
+                    .setDescription("No activity detected. The lobby has been closed. Game will start.")
                     .setTimestamp();
 
                 await msg.edit({
@@ -103,8 +101,8 @@ module.exports = {
                 clearTimeout(freshState.lobbyTimeout)
                 freshState.lobbyTimeout = null;
           
-                await hotPotato.startPotato(client, interaction);
-            }, 24 * 60 * 60 * 1000);
+                await hotPotato.startPotato(client, guildId);
+            }, 10000);
 
             const response = await interaction.reply({
                 embeds: [embed],

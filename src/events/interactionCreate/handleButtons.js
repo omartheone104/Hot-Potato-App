@@ -139,7 +139,7 @@ module.exports = async (client, interaction) => {
             }
 
             const cancelEmbed = new EmbedBuilder()
-                .setTitle(";( Lobby Cancelled")
+                .setTitle("Lobby Cancelled")
                 .setDescription("The Hot Potato lobby was cancelled.")
                 .setTimestamp();
             
