@@ -102,7 +102,7 @@ module.exports = {
                 freshState.lobbyTimeout = null;
           
                 await hotPotato.startPotato(client, guildId);
-            }, 10000);
+            }, 24 * 60 * 60 * 1000);
 
             const response = await interaction.reply({
                 embeds: [embed],
