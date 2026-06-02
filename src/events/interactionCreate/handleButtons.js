@@ -13,6 +13,16 @@ const createLobbyEmbed = (state) => {
 
 };
 
+const lobbyStartedEmbed = (state) => {
+    const players = state.players.length ? state.players.map(id => `<@${id}>`).join("\n") : "No players joined.";
+
+    return new EmbedBuilder()
+        .setTitle("Hot Potato Lobby")
+        .setDescription(`Players (${state.players.length})\n\n${players}\n\nLobby has started.`)
+        .setTimestamp();
+
+};
+
 const createButtons = () => {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
@@ -113,11 +123,11 @@ module.exports = async (client, interaction) => {
             }
 
             await interaction.update({
-                embeds: [createLobbyEmbed(state)],
+                embeds: [lobbyStartedEmbed(state)],
                 components: [],
             });
 
-            await hotPotato.startPotato(client, interaction);
+            await hotPotato.startPotato(client, guildId);
             break;
         }
         case "hotpotato_cancel": {

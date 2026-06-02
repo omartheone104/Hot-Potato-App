@@ -188,34 +188,39 @@ module.exports = {
             interaction.followUp(`${player_name} has the potato`);
         });
     },
-    gameEnded: async function gameEnded(client, interaction, winner_id = null){
-        const correct_guild = interaction.guild.id;
+    gameEnded: async function gameEnded(client, guildId, winner_id = null){
+        const state = gameState.getState(guildId);
+        const guild = client.guilds.cache.get(guildId);
+        const channel = client.channels.cache.get(state.lobbyChannelId);
+        const correct_guild = guildId;
+        const channelID = channel.id;
+
         if (countdown_interval_map.has(correct_guild)) {
             clearInterval(countdown_interval_map.get(correct_guild));
             countdown_interval_map.delete(correct_guild);
         }
 
         countdown_message_map.delete(correct_guild);
-
-        const state = gameState.getState(correct_guild);
         clearTimeout(timeout_map.get(correct_guild));
 
         if (winner_id) {
-            const member = await interaction.guild.members.fetch(winner_id).catch(() => null);
+            const member = await guild.members.fetch(winner_id).catch(() => null);
             const winner_name = member?.displayName ?? member?.user.username ?? "Unknown Player";
-            await interaction.followUp(`<@${winner_id}> (${winner_name}) is the winner!`);
+            await channel.send(`<@${winner_id}> (${winner_name}) is the winner!`);
         } else {
             db.get("SELECT RemainingPlayers FROM Game WHERE GuildID = ?", [correct_guild], async (err, column) => {
                 if (err || !column) return;
                 const winner_id = column.RemainingPlayers;
-                const member = await interaction.guild.members.fetch(winner_id).catch(() => null);
+                const member = await guild.members.fetch(winner_id).catch(() => null);
                 const winner_name = member?.displayName ?? member?.user.username ?? "Unknown Player";
-                interaction.followUp(`<@${winner_id}> (${winner_name}) is the winner!`);
+                await channel.send(`<@${winner_id}> (${winner_name}) is the winner!`);
             });
         }
         
         state.started = false;
         state.starting = false;
+        state.players = [];
+        state.hostId = null;
         db.run("DELETE FROM Game WHERE GuildID = ?", [correct_guild]);
         time_map.delete(correct_guild);
         timeout_map.delete(correct_guild);
@@ -249,7 +254,7 @@ module.exports = {
                 await channel.send(`${player_with_potato_name} is out. ${winner_name} has the potato.`)
                     .then(() => {
                         setTimeout(() => {
-                            this.gameEnded(client, interaction, winner_id);
+                            this.gameEnded(client, correct_guild, winner_id);
                         }, 200);
                     });
                 return;
@@ -309,16 +314,16 @@ module.exports = {
         await interaction.reply("Force end game");
     },
     timeFunc: async function timeFunc(guildId){
-        const baseTime = 24 * 60 * 60 * 1000;
-        //const devBaseTime = 30000;
+        //const baseTime = 24 * 60 * 60 * 1000;
+        const devBaseTime = 30000;
         const decayPercent = 0.10;
         const minTime = 5000;
 
         let count = count_map.get(guildId) ?? 0;
 
-        const newTime = Math.max(Math.floor(baseTime * Math.pow(1 - decayPercent, count)), minTime);
+        //const newTime = Math.max(Math.floor(baseTime * Math.pow(1 - decayPercent, count)), minTime);
 
-        //const newTime = Math.max(Math.floor(devBaseTime * Math.pow(1 - decayPercent, count)), minTime);
+        const newTime = Math.max(Math.floor(devBaseTime * Math.pow(1 - decayPercent, count)), minTime);
 
         count++;
         
