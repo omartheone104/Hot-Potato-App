@@ -314,16 +314,16 @@ module.exports = {
         await interaction.reply("Force end game");
     },
     timeFunc: async function timeFunc(guildId){
-        //const baseTime = 24 * 60 * 60 * 1000;
-        const devBaseTime = 30000;
+        const baseTime = 24 * 60 * 60 * 1000;
+        //const devBaseTime = 30000;
         const decayPercent = 0.10;
         const minTime = 5000;
 
         let count = count_map.get(guildId) ?? 0;
 
-        //const newTime = Math.max(Math.floor(baseTime * Math.pow(1 - decayPercent, count)), minTime);
+        const newTime = Math.max(Math.floor(baseTime * Math.pow(1 - decayPercent, count)), minTime);
 
-        const newTime = Math.max(Math.floor(devBaseTime * Math.pow(1 - decayPercent, count)), minTime);
+        //const newTime = Math.max(Math.floor(devBaseTime * Math.pow(1 - decayPercent, count)), minTime);
 
         count++;
         
