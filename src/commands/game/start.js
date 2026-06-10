@@ -7,7 +7,6 @@ module.exports = {
     name: 'start',
     description: 'starts a new Hot Potato lobby',
     defaultMemberPermissions: null,
-    deleted: true,
     // devOnly: Boolean,
     // options: Object[],
 
