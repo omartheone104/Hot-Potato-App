@@ -5,6 +5,7 @@ const buttonPagination = require('../../utils/buttonPagination');
 module.exports = {
     name: 'help',
     description: 'Information about the game',
+    defaultMemberPermissions: null,
     // devOnly: Boolean,
     // options: Object[],
 

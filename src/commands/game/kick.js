@@ -1,10 +1,12 @@
-const { Client, Interaction } = require("discord.js");
+const { Client, Interaction, PermissionFlagsBits } = require("discord.js");
 const hotPotato = require("../../hot_potato");
 
 module.exports = {
     name: 'kick',
     description: 'kicks player with the hot potato out of the game (admin only)',
     devOnly: true,
+    defaultMemberPermissions: PermissionFlagsBits.Administrator,
+    
     // options: Object[],
 
     callback: async (client, interaction) => {

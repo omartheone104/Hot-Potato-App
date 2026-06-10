@@ -4,6 +4,7 @@ const hotPotato = require("../../hot_potato");
 module.exports = {
     name: 'pass',
     description: 'pass the hot potato to another player',
+    defaultMemberPermissions: null,
     // devOnly: Boolean,
     options: [
         {

@@ -78,7 +78,6 @@ module.exports = {
 
                 this.timeFunc(guildId);
                 const delay = time_map.get(guild.id);
-                this.startCountdown(client, guildId, delay);
                 clearTimeout(timeout_map.get(guild.id));
                 const timeout = setTimeout(() => this.kickPlayer(client, guildId), delay);
                 timeout_map.set(guild.id, timeout);
@@ -130,7 +129,6 @@ module.exports = {
 
                 this.timeFunc(correct_guild);
                 const delay = time_map.get(correct_guild);
-                this.startCountdown(client, correct_guild, delay);
                 clearTimeout(timeout_map.get(correct_guild));
                 const timeout = setTimeout(() => this.kickPlayer(client, correct_guild), delay);
                 timeout_map.set(correct_guild, timeout);
@@ -171,7 +169,6 @@ module.exports = {
 
                 this.timeFunc(correct_guild);
                 const delay = time_map.get(correct_guild);
-                this.startCountdown(client, correct_guild, delay);
                 clearTimeout(timeout_map.get(correct_guild));
                 const timeout = setTimeout(() => this.kickPlayer(client, correct_guild), delay);
                 timeout_map.set(correct_guild, timeout);
@@ -279,7 +276,6 @@ module.exports = {
             
             this.timeFunc(guildId);
             const delay = time_map.get(correct_guild);
-            this.startCountdown(client, guildId, delay);
             clearTimeout(timeout_map.get(correct_guild));
             const timeout = setTimeout(() => this.kickPlayer(client, guildId), delay);
             timeout_map.set(correct_guild, timeout);
@@ -314,16 +310,16 @@ module.exports = {
         await interaction.reply("Force end game");
     },
     timeFunc: async function timeFunc(guildId){
-        const baseTime = 24 * 60 * 60 * 1000;
-        //const devBaseTime = 30000;
+        //const baseTime = 24 * 60 * 60 * 1000;
+        const devBaseTime = 30000;
         const decayPercent = 0.10;
         const minTime = 5000;
 
         let count = count_map.get(guildId) ?? 0;
 
-        const newTime = Math.max(Math.floor(baseTime * Math.pow(1 - decayPercent, count)), minTime);
+        //const newTime = Math.max(Math.floor(baseTime * Math.pow(1 - decayPercent, count)), minTime);
 
-        //const newTime = Math.max(Math.floor(devBaseTime * Math.pow(1 - decayPercent, count)), minTime);
+        const newTime = Math.max(Math.floor(devBaseTime * Math.pow(1 - decayPercent, count)), minTime);
 
         count++;
         
@@ -332,73 +328,4 @@ module.exports = {
 
         console.log(`[${guildId}] Timer updated → ${(newTime / 1000).toFixed(2)}s (count: ${count})`);
     },
-    startCountdown: async function startCountdown(client, guildId, totalMs){   
-        const state = gameState.getState(guildId);
-        const channel = client.channels.cache.get(state.lobbyChannelId);
-        
-        if (countdown_interval_map.has(guildId)){
-            clearInterval(countdown_interval_map.get(guildId));
-            countdown_interval_map.delete(guildId);
-        }
-
-        const endTime = Date.now() + totalMs;
-
-        let message = countdown_message_map.get(guildId);
-
-        const remainingSeconds = Math.ceil(totalMs / 1000);
-
-        if (!message) {
-            message = await channel.send(`Hot Potato Timer \n${this.formatTime(remainingSeconds)} remaining\n${this.progressBar(totalMs, totalMs)}`);
-            countdown_message_map.set(guildId, message);
-        } else {
-            await message.edit(`Hot Potato Timer \n${this.formatTime(remainingSeconds)} remaining\n${this.progressBar(totalMs, totalMs)}`);
-        }
-        
-        const interval = setInterval(async () => {
-            const remainingMs = Math.max(0, endTime - Date.now());
-            const remainingSeconds = Math.ceil(remainingMs / 1000);
-
-            if (remainingMs <= 0) {
-                clearInterval(interval);
-                countdown_interval_map.delete(guildId);
-                return;
-            }
-
-            try {
-                await message.edit(
-                    `Hot Potato Timer \n${this.formatTime(remainingSeconds)} remaining\n${this.progressBar(remainingMs, totalMs)}`
-                );
-            } catch {
-                clearInterval(interval);
-                countdown_interval_map.delete(guildId);
-            }
-        }, 1000);
-
-        countdown_interval_map.set(guildId, interval);
-    },
-    progressBar: function progressBar(remainingMs, totalMs, size = 10){
-        const filled = Math.round((remainingMs / totalMs) * size);
-        return "█".repeat(filled) + "░".repeat(size - filled);
-    },
-    formatTime: function formatTime(totalSeconds){
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-
-        const parts = [];
-
-        if (hours > 0) {
-            parts.push(`${hours} hour${hours !== 1 ? "s" : ""}`);
-        }
-
-        if (minutes > 0) {
-            parts.push(`${minutes} minute${minutes !== 1 ? "s" : ""}`);
-        }
-
-        if (seconds > 0 || parts.length === 0) {
-            parts.push(`${seconds} second${seconds !== 1 ? "s" : ""}`);
-        }
-
-        return parts.join(", ");
-    }
 };

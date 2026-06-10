@@ -6,9 +6,14 @@ const getLocalCommands = require('../../utils/getLocalCommands');
 module.exports = async (client) => {
   try {
     const localCommands = getLocalCommands();
-    const applicationCommands = await getApplicationCommands(
-      client
-    );
+    const applicationCommands = await getApplicationCommands(client);
+
+    // applicationCommands.cache.forEach(cmd => {
+    //   console.log({
+    //     name: cmd.name,
+    //     defaultMemberPermissions: cmd.defaultMemberPermissions?.toString(),
+    //   });
+    // });
 
     for (const localCommand of localCommands) {
       const { name, description, options, defaultMemberPermissions, } = localCommand;

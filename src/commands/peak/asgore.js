@@ -5,6 +5,7 @@ const path = require('path');
 module.exports = {
     name: 'asgore',
     description: 'Driving in my car right after a beer',
+    defaultMemberPermissions: null,
     // devOnly: Boolean,
     options: [
         {

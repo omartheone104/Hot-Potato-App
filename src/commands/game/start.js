@@ -1,10 +1,12 @@
 const { MessageFlags, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const gameState = require("../../utils/gameState");
 const hotPotato = require("../../hot_potato");
+const { defaultMemberPermissions } = require("./end");
 
 module.exports = {
     name: 'start',
     description: 'starts a new Hot Potato lobby',
+    defaultMemberPermissions: null,
     // devOnly: Boolean,
     // options: Object[],
 

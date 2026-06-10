@@ -4,6 +4,7 @@ const hotPotato = require("../../hot_potato");
 module.exports = {
     name: 'remaining',
     description: 'displays remaining players in game',
+    defaultMemberPermissions: null,
     // devOnly: Boolean,
     // options: Object[],
 

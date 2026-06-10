@@ -4,6 +4,7 @@ const hotPotato = require("../../hot_potato");
 module.exports = {
     name: 'whohaspotato',
     description: 'displays the current holder of the potato',
+    defaultMemberPermissions: null,
     // devOnly: Boolean,
     // options: Object[],
 
