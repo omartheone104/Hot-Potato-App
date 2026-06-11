@@ -8,7 +8,7 @@ Every round is unpredictable — timing, targeting, and quick decisions determin
 
 ## Release
 
-**Hot Potato Bot v1.0 is now live**
+**Hot Potato Bot v1.0.3 is now live**
 
 This release includes the full core gameplay loop:
 
